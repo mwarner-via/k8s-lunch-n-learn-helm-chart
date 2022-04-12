@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: receiver-deployment
+  labels:
+    app: receiver
+spec:
+  replicas: {{ .Values.receiver.replicas }}
+  selector:
+    matchLabels:
+      app: receiver
+  template:
+    metadata:
+      labels:
+        app: receiver
+    spec:
+      imagePullSecrets:
+        - name: ecr
+      containers:
+        - name: receiver
+          image: "893823511921.dkr.ecr.ca-central-1.amazonaws.com/k8s-lunch-n-learn-receiver:{{ .Values.receiver.image.tag }}"
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: receiver-svc
+spec:
+  selector:
+    app: receiver
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: NodePort

@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: decryptor
+  labels:
+    app: decryptor
+spec:
+  replicas: {{ .Values.decryptor.replicas }}
+  selector:
+    matchLabels:
+      app: decryptor
+  template:
+    metadata:
+      labels:
+        app: decryptor
+    spec:
+      imagePullSecrets:
+        - name: ecr
+      containers:
+        - name: decryptor
+          image: "893823511921.dkr.ecr.ca-central-1.amazonaws.com/k8s-lunch-n-learn-receiver:{{ .Values.decryptor.image.tag }}"
+          ports:
+            - containerPort: 5001
+              protocol: TCP
+          envFrom:
+          - secretRef:
+              name: decryptor-key
